@@ -20,6 +20,7 @@ from graphrag.query.input.loaders.dfs import (
 )
 from graphrag.vector_stores import VectorStoreFactory, VectorStoreType
 from graphrag.vector_stores.lancedb import LanceDBVectorStore
+from graphrag.vector_stores.kusto import KustoVectorStore
 
 from .factories import get_global_search_engine, get_local_search_engine
 from .indexer_adapters import (
