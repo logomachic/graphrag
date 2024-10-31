@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run RRF Function</title>
+</head>
+<body>
+    <h1>Run RRF Function</h1>
+    <form id="rrfForm">
+        <label for="query">Query:</label>
+        <input type="text" id="query" name="query" required>
+        <label for="contextId">Context ID:</label>
+        <input type="text" id="contextId" name="contextId" required>
+        <button type="submit">Run RRF</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('rrfForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const query = document.getElementById('query').value;
+            const contextId = document.getElementById('contextId').value;
+
+            // Run query-save for paths 0 to 3
+            const queryIds = [];
+            for (let i = 0; i < 4; i++) {
+                const response = await fetch('/api/query-save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: query, context_id: contextId, path: i })
+                });
+                const result = await response.json();
+                queryIds.push(result.query_id);
+            }
+
+            // Run RRF
+            const rrfResponse = await fetch('/api/rrf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query_ids: queryIds.join(',') })
+            });
+            const rrfResult = await rrfResponse.json();
+            const rrfQueryId = rrfResult.query_id;
+
+            // Summarize
+            const summarizeResponse = await fetch('/api/summarize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query_id: rrfQueryId })
+            });
+            const summarizeResult = await summarizeResponse.text();
+
+            document.getElementById('result').innerText = summarizeResult;
+        });
+    </script>
+</body>
+</html>
